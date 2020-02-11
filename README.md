@@ -18,14 +18,24 @@ $ export LDFLAGS="-L/opt/Software/maxeler/maxcompiler-2018.3.1/lib/ -lslic -lcur
 
 configure nanos++
 
-$ configure --prefix=<nanos++-installation directory> --with-maxcompiler=<Maxcompiler-installation-directory> --with-maxeleros=<MaxelerOS-installation-directory>
+$ <path-to-nanox-mx>/configure --prefix=<nanos++-installation-directory> --with-maxcompiler=<Maxcompiler-installation-directory> --with-maxeleros=<MaxelerOS-installation-directory>
 
 compile nanos++
 
-make
+$ make
 
-install nanos++
+Install nanos++
 
-make install
+$ make install
 
+Configure Mercurium
 
+$ <path-to-mcxx>/configure --prefix=<mcxx-installation-directory> --with-nanox=<nanos++-installation-directory> --enable-ompss --enable-openmp
+
+Compile Mercurium
+
+$ make 
+
+Install Mercurium
+
+$ make install
