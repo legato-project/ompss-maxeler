@@ -24,13 +24,8 @@
 
 #include "workdescriptor.hpp"
 
-#include <stdio.h>
-
 namespace nanos {
 namespace ext {
-
-
-
    class MaxWorker {
       public:
          struct MaxDFE {
@@ -38,38 +33,19 @@ namespace ext {
             const char *name;
             unsigned int type;
             MaxDFE(void *init, const char* n, unsigned int t):
-               dfeInit(init), name(n), type(t) { printf ("Building MaxDFE\n"); }
+               dfeInit(init), name(n), type(t) {}
          };
+
 
       private:
          static WD * getMaxWD( BaseThread * thread );
-         //static std::list< MaxDFE > _dfeList;
-         //static MaxDFE _dfeList;
-         //static int sz;
-         //static std::queue< MaxDFE > _dfeList;
-         //static std::queue< WD * > _runningTasks;
+         static std::list< MaxDFE > _dfeList;
+         static std::queue< WD * > _runningTasks;
       public:
-         //std::list< MaxDFE > _dfeList;
-         //std::queue< WD * > _runningTasks;
          static void MaxWorkerLoop();
-         //static std::list<MaxDFE> & getDFEList() { /* printf ("_dfeList %p\n", &_dfeList); */ return _dfeList; }
-         //static MaxDFE * getDFEList() { /* printf ("_dfeList %p\n", &_dfeList); */ return &_dfeList; }
-         //static std::queue <MaxDFE> & getDFEList() { /* printf ("_dfeList %p\n", &_dfeList); */ return _dfeList; }
-         //static std::queue <MaxDFE> & getDFEList();// { /* printf ("_dfeList %p\n", &_dfeList); */ return _dfeList; }
-         static std::list <MaxDFE> & getDFEList() { /* printf ("_dfeList %p\n", &_dfeList); */ static std::list< MaxWorker::MaxDFE > _dfeList; return _dfeList; }
-         static std::queue <WD *> & getRunningTasks() {
-            static std::queue< WD * > _runningTasks; return _runningTasks;
-         }
+         static std::list<MaxDFE> & getDFEList() { return _dfeList; }
          static void addDFE( void *initFun, const char* name, unsigned int type );
-         MaxWorker() {
-          printf ("Constructing MaxWorker\n");
-          //printf("list sizes %ld %ld\n", _dfeList.size(), _runningTasks.size());
-         }
-
    };
-
-         //extern std::queue< MaxWorker::MaxDFE > _dfeList;
-         //extern std::queue< WD * > _runningTasks;
 }
 }
 

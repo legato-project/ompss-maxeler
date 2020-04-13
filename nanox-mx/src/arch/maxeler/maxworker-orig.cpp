@@ -23,32 +23,11 @@
 
 #include "schedule.hpp"
 
-namespace nanos {
-namespace ext {
-
-//std::queue< MaxWorker::MaxDFE > _dfeList;
-//std::queue< WD * > _runningTasks;
-
-}
-}
-
 using namespace nanos;
 using namespace ext;
 
-
-
-//std::list< MaxWorker::MaxDFE > MaxWorker::_dfeList;
-//MaxWorker::MaxDFE MaxWorker::_dfeList;
-//int MaxWorker::sz;
-//std::queue< MaxWorker::MaxDFE > MaxWorker::_dfeList =
-//         std::queue< MaxWorker::MaxDFE >();
-//std::queue<MaxWorker::MaxDFE> q = std::queue< MaxWorker::MaxDFE >();
-
-//MaxWorker::MaxDFE  globalList;
-
-//std::queue< WD * > MaxWorker::_runningTasks;
-
-//std::queue <MaxWorker::MaxDFE> & MaxWorker::getDFEList() { /* printf ("_dfeList %p\n", &_dfeList); */ return _dfeList; }
+std::list< MaxWorker::MaxDFE > MaxWorker::_dfeList;
+std::queue< WD * > MaxWorker::_runningTasks;
 
 void MaxWorker::MaxWorkerLoop() {
    BaseThread *parent = getMyThreadSafe();
@@ -65,21 +44,12 @@ void MaxWorker::MaxWorkerLoop() {
 
       wd = MaxWorker::getMaxWD( currentThread );
       if ( wd == NULL ) { //no ready tasks -> finish running tasks
-#if 0
          if ( ! _runningTasks.empty() ) {
             wd = _runningTasks.front();
             if ( dfe->tryPostOutlineWork( wd ) ) {
                _runningTasks.pop();
                Scheduler::postOutlineWork( wd, true, currentThread );
             }
-#else
-         if ( ! getRunningTasks().empty() ) {
-            wd = getRunningTasks().front();
-            if ( dfe->tryPostOutlineWork( wd ) ) {
-               getRunningTasks().pop();
-               Scheduler::postOutlineWork( wd, true, currentThread );
-            }
-#endif
          }
       } else {
          //Run a ready task
@@ -87,11 +57,7 @@ void MaxWorker::MaxWorkerLoop() {
          if ( Scheduler::tryPreOutlineWork( wd ) ) {
             dfe->preOutlineWorkDependent( *wd );
             Scheduler::outlineWork( currentThread, wd );
-#if 0
             _runningTasks.push( wd );
-#else
-            getRunningTasks().push( wd );
-#endif
          } else {
             fatal( "Maxeler task could not allocate memory (!!!)" );
          }
@@ -123,42 +89,8 @@ WD * MaxWorker::getMaxWD( BaseThread * thread ) {
    }
    return wd;
 }
-#include <stdio.h>
 
 void MaxWorker::addDFE(void *initFun, const char *name, unsigned int type) {
-   //MaxWorker::MaxWorker();
-   //_dfeList = std::queue< MaxWorker::MaxDFE >();
+   _dfeList.push_back( MaxDFE( initFun, name, type ) );
 
-   static std::list<MaxWorker::MaxDFE> q = std::list< MaxWorker::MaxDFE >();
-   //q = std::queue< MaxWorker::MaxDFE >();
-   //
-   //_dfeList = q;
-
-#ifdef MAXDEBUG
-   //printf ("qsize %ld %ld\n", q.size(), _dfeList.size());
-   printf ("qsize %ld %ld\n", q.size(), MaxWorker::getDFEList().size());
-
-   MaxWorker::MaxDFE a = MaxDFE(initFun, name, type ) ;
-   //printf ("a..name %s list size %ld run size %ld\n", a.name, _dfeList.size(), getRunningTasks().size());
-   printf ("a..name %s list size %ld run size %ld\n", a.name, MaxWorker::getDFEList().size(), getRunningTasks().size());
-#endif
-   //_dfeList.push_back( MaxDFE( initFun, name, type ) );
-   MaxWorker::getDFEList().push_back( MaxDFE( initFun, name, type ) );
-   //globalList = MaxDFE( initFun, name, type );
-   //printf("name %s\n", _dfeList.back().name);
-   //////printf ("MaxDFE %p\n", &(MaxDFE( initFun, name, type )));
-   //printf ("MaxDFE %p\n", &a);
-   //if (MaxWorker::getDFEList().empty()) printf ("List empty\n");
-   //if (MaxWorker::sz == 0) printf ("List empty\n");
-   //else { printf ("Initializing List\n"); MaxWorker::_dfeList.clear(); }
-//printf ("trying push_back %p %p %s %d\n", &MaxWorker::_dfeList, initFun, name, type);
-//printf ("trying push_back %p %p %s %d\n", &MaxWorker::getDFEList(), initFun, name, type);
-   //MaxWorker::getDFEList().push_back(a);
-   //MaxWorker::_dfeList[MaxWorker::_sz++] = a;
-   
-  // printf("queue size %ld DFE %p\n", _dfeList.size(), &a);
-  // _dfeList.push( a );
-#ifdef MAXDEBUG
-   printf ("addDFE ok\n");
-#endif
 }

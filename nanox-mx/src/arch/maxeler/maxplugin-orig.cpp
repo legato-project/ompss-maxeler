@@ -28,14 +28,8 @@
 #include "maxworker.hpp"
 #include "maxdd.hpp"
 
-#include <stdio.h>
-
 namespace nanos {
 namespace ext {
-
-//extern MaxWorker::MaxDFE  globalList;
-
-
 class MaxPlugin : public ArchPlugin
 {
    private:
@@ -46,41 +40,20 @@ class MaxPlugin : public ArchPlugin
    public:
       MaxPlugin() : ArchPlugin( "Maxeler DFE plugin", 1 ) {}
       void config( Config &cfg ) {
-#ifdef MAXDEBUG
-printf ("MaxConfig::prepare\n");
-#endif
          MaxConfig::prepare( cfg );
       }
 
       void init() {
          maxPEs = NEW std::vector< MaxProcessor * >();
-#ifdef MAXDEBUG
-printf ("maxPEs.size %p %ld\n", maxPEs, maxPEs->size());
-#endif
+
          if ( MaxConfig::isDisabled() ) {
             debug("MaxDFE support is disabled. Skipping initialization");
             return;
          }
          //TODO: free
          MaxDD::init( &_maxDevices );
-#ifdef MAXDEBUG
-printf ("MaxDD::init\n");
-#endif
-         //std::list < MaxWorker::MaxDFE > & dfeList = MaxWorker::getDFEList();
-         //MaxWorker::MaxDFE * dfeList = MaxWorker::getDFEList();
          std::list < MaxWorker::MaxDFE > & dfeList = MaxWorker::getDFEList();
-#ifdef MAXDEBUG
-printf ("getDFEList ok %p\n", &dfeList);
-printf ("dfeList.size() %ld\n", dfeList.size());
-#endif
-#if 1
          maxPEs->reserve( dfeList.size() );
-#else
-         maxPEs->reserve( 1 );
-#endif
-#ifdef MAXEBUG
-printf ("reserved maxthreads %d\n", MaxConfig::getNumMaxThreads());
-#endif
 
          _helperThreads.reserve( MaxConfig::getNumMaxThreads() );
          _helperCores.reserve( MaxConfig::getNumMaxThreads() );
@@ -89,22 +62,11 @@ printf ("reserved maxthreads %d\n", MaxConfig::getNumMaxThreads());
 
          //TODO: Initialize maxeler runtime
 
-#if 1
          for ( std::list< MaxWorker::MaxDFE >::const_iterator it = dfeList.begin();
                it != dfeList.end();
                it++ )
-#endif
          {
-#if 1
-#else
-	    MaxWorker::MaxDFE & it = dfeList.back();
-#endif
 
-#ifdef MAXDEBUG
-            printf ("&it %p\n", &it);
-            //MaxDevice *maxDev = NEW MaxDevice( it->name );
-            printf ("name %s\n", it->name);
-#endif
             MaxDevice *maxDev = NEW MaxDevice( it->name );
             memory_space_id_t memId = sys.addSeparateMemoryAddressSpace(
                   *maxDev, false, 0);
@@ -123,17 +85,13 @@ printf ("reserved maxthreads %d\n", MaxConfig::getNumMaxThreads());
             //Creating a device for each pe may not be needed
             //as we don't have types yet
             MaxProcessorInfo info( it->dfeInit, it->name );
-            //MaxProcessorInfo info( it.dfeInit, it.name );
             MaxProcessor *dfe = NEW MaxProcessor( info, memId, maxDev );
             //Set timeout for accelerator
             dfe->setTimeoutTicks( MaxConfig::getTimeoutTicks() );
             maxPEs->push_back( dfe );
             _maxDevices.insert( std::make_pair( it->type, maxDev ) );
-            //_maxDevices.insert( std::make_pair( it.type, maxDev ) );
          }
-#ifdef MAXDEBUG
-printf ("trying %d\n", MaxConfig::getNumMaxThreads());
-#endif
+
          for ( int i = 0; i < MaxConfig::getNumMaxThreads(); i++ ) {
             SMPProcessor * core = sys.getSMPPlugin()->getLastFreeSMPProcessorAndReserve();
             if ( core != NULL ) {
@@ -147,9 +105,8 @@ printf ("trying %d\n", MaxConfig::getNumMaxThreads());
 
       }
 
-      virtual void finalize() {
+      void finalize() {
          //clean up stuff
-         printf ("Finalizing arch DFE\n");
       }
 
 
@@ -179,9 +136,6 @@ printf ("trying %d\n", MaxConfig::getNumMaxThreads());
       }
 
       virtual void addDevices( DeviceList &devices ) const {
-#ifdef MAXDEBUG
-printf ("addDevices\n");
-#endif
          for ( MaxDeviceMap::const_iterator it = _maxDevices.begin();
                it != _maxDevices.end();
                it++) {

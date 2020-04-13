@@ -58,8 +58,6 @@
 
 #include "addressspace.hpp"
 
-#include <stdio.h>
-
 using namespace nanos;
 
 System nanos::sys;
@@ -700,9 +698,7 @@ void System::finish ()
    for ( unsigned int nodeCount = 0; nodeCount < _net.getNumNodes(); nodeCount += 1 ) {
       if ( _net.getNodeNum() == nodeCount ) {
          for ( ArchitecturePlugins::const_iterator it = _archs.begin(); it != _archs.end(); ++it ) {
-//printf("finalizing %d\n", ((*it)->finalize == NULL) ? 0 : 1);
-            //if ((*it)->finalize != NULL) (*it)->finalize();
-            //(*it)->finalize();
+            (*it)->finalize();
          }
       }
       if ( usingCluster() ) {
