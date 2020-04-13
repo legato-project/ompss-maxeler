@@ -1,0 +1,47 @@
+package gemm;
+
+import maxpower.blas.l3.TileMultiplierKernel;
+
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEType;
+import com.maxeler.maxcompiler.v2.managers.BuildConfig;
+import com.maxeler.maxcompiler.v2.managers.BuildConfig.Effort;
+import com.maxeler.platform.max5.manager.Max5LimaManager;
+import com.maxeler.maxcompiler.v2.managers.custom.DFELink;
+import com.maxeler.maxcompiler.v2.managers.custom.stdlib.DebugLevel;
+
+public class GemmManagerMax5 {
+	
+	private static class GemmCustomManager extends Max5LimaManager {
+		
+		private GemmCustomManager(GemmEngineParameters params) {
+			super(params);
+			configBuild(params);
+	
+			DFEType type = params.getFloatingPointType();
+	
+			int tileSize = params.getTileSize();
+	
+			addMaxFileConstant("tileSize", tileSize);
+			addMaxFileConstant("frequency", params.getFrequency());
+	
+			DFELink a = addStreamFromCPU("A");
+			DFELink b = addStreamFromCPU("B");
+	
+			addStreamToCPU("C") <== TileMultiplierKernel.multiplyTiles(this, "TM", type, tileSize, a, b);
+		}
+	
+		private void configBuild(GemmEngineParameters params) {
+			setDefaultStreamClockFrequency(params.getFrequency());
+
+			//getCurrentKernelConfig().optimization.setConditionalArithmeticEnabled(true);
+			//getCurrentKernelConfig().optimization.setUseGlobalClockBuffer(true);
+			//_KernelConfiguration.getPhotonKernelConfig(getCurrentKernelConfig()).optimizations().setBetterRegisteringEnabled(true);
+		}
+		
+	}
+
+	public static void main(String[] args) {
+		GemmEngineParameters params = new GemmEngineParameters(args);
+		new GemmCustomManager(params).build();
+	}
+}
